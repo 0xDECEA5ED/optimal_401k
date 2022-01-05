@@ -1,4 +1,5 @@
 # Imports
+import functools
 
 # Globals
 salary = 75000 #Dummy numbers from spreadsheet
@@ -8,6 +9,7 @@ match_percent = 0.25
 match_first = 0.06
 test_rate = 0.06
 
+@functools.cache
 def do_month(principal, contribution, rate):
     interest = principal*(1+rate/12)
     match = match_percent*contribution if contribution <= (salary/12*match_first) else salary/12*match_first*match_percent
@@ -61,7 +63,7 @@ def maximize(principal, rate):
                                                 for a12 in range(0,int(salary/12)):
                                                     
                                                     
-                                                    c_sum = a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12
+                                                    c_sum = a1 + a2 + a3 + a4 + a5 + a6 + a7 + a8 + a9 + a10 + a11 + a12
                                                     
                                                     if c_sum > max_yearly_contribution:
                                                         break
@@ -131,3 +133,5 @@ def maximize(principal, rate):
     print("Best nov:",best_nov)
     print("Best dec:",best_dec)
     print("Max total:",max_val)
+
+maximize(current_balance,test_rate)
