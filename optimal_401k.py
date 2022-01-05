@@ -37,7 +37,7 @@ def maximize(principal, rate):
         if (a1) > max_yearly_contribution:
             break
         jan = do_month(principal, a1, rate)
-        for a2 in range(0,int(salary/12)),11:
+        for a2 in range(0,int(salary/12),11):
             if (a1+a2) > max_yearly_contribution:
                 break
             feb = do_month(jan, a2, rate)
