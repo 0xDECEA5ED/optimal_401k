@@ -16,22 +16,6 @@ def do_month(principal, contribution, rate):
     bal = principal + interest + contribution + match
     return bal
 
-@functools.cache
-def do_year(principal, rate, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12):
-    jan = do_month(principal, a1, rate)
-    feb = do_month(jan, a2, rate)
-    mar = do_month(feb, a3, rate)
-    apr = do_month(mar, a4, rate)
-    may = do_month(apr, a5, rate)
-    jun = do_month(may, a6, rate)
-    jul = do_month(jun, a7, rate)
-    aug = do_month(jul, a8, rate)
-    sep = do_month(aug, a9, rate)
-    oct = do_month(sep, a10, rate)
-    nov = do_month(oct, a11, rate)
-    dec = do_month(nov, a12, rate)
-    return dec
-
 def maximize(principal, rate):
 
     best_jan = 0
