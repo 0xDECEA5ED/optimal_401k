@@ -1,114 +1,41 @@
-# Imports
-import functools
-
 # Globals
-salary = 78750 #Dummy numbers from spreadsheet
-current_balance = 20500
-max_yearly_contribution = 20500
-match_percent = 0.25
-match_first = 0.06
-test_rate = 0.06
+SALARY = 78750       # Your yearly gross salary
+CUR_BAL = 20500      # Approximate current value of your 401k, if any
+YEARLY_MAX = 20500   # Maximum amount in dollars to contribute to 401k, before tax
+MATCH_PERCENT = 0.25 # Percentage of each paycheck matched. By default this is configured for "Employer matches 25% of the first 6% contributed"
+MATCH_FIRST = 0.06   # Maximum percentage of check to match
+INTEREST_RATE = 0.06 # APY rate in decimal form
+STEP = 0.25          # Accuracy of optimization in dollars. Lower values significantly decrease performance
 
-@functools.cache
-def do_month(principal, contribution, rate):
-    interest = principal*(rate/12)
-    match = match_percent*contribution if contribution <= (salary/12*match_first) else salary/12*match_first*match_percent
-    bal = principal + interest + contribution + match
-    return bal
+def do_year(principal, rate, vals):
+    for v in vals:
+        interest = principal*(rate/12)
+        match = MATCH_PERCENT*v if v <= (SALARY/12*MATCH_FIRST) else SALARY/12*MATCH_FIRST*MATCH_PERCENT
+        principal = principal + interest + v + match
+    return principal
 
-def maximize(principal, rate):
+l = list()
+remaining = YEARLY_MAX
+for month in range(0,12):
+    val = int(SALARY/12) if remaining > int(SALARY/12) else remaining if remaining < int(SALARY/12) and remaining > 0 else 0
+    remaining -= val
+    l.insert(0,val)
 
-    best_jan = 0
-    best_feb = 0
-    best_mar = 0
-    best_apr = 0
-    best_may = 0
-    best_jun = 0
-    best_jul = 0
-    best_aug = 0
-    best_sep = 0
-    best_oct = 0
-    best_nov = 0
-    best_dec = 0
-
-    max_val = 0
-
-    for a1 in range(0,int(salary/12),11):
-        if (a1) > max_yearly_contribution:
-            break
-        jan = do_month(principal, a1, rate)
-        for a2 in range(0,int(salary/12),11):
-            if (a1+a2) > max_yearly_contribution:
+max = do_year(CUR_BAL, INTEREST_RATE, l)
+cont = True
+while cont:
+    for i in range(len(l)-1,0,-1):
+        if l[i] > 0 and l[i-1] <= int(SALARY/12):
+            cont = False
+            l[i] = l[i] - STEP
+            l[i-1] = l[i-1] + STEP
+            x = do_year(CUR_BAL, INTEREST_RATE, l)
+            if x > max:
+                max = x
+                cont = True
                 break
-            feb = do_month(jan, a2, rate)
-            for a3 in range(0,int(salary/12),11):
-                if (a1+a2+a3) > max_yearly_contribution:
-                    break
-                mar = do_month(feb, a3, rate)
-                for a4 in range(0,int(salary/12),11):
-                    if (a1+a2+a3+a4) > max_yearly_contribution:
-                        break
-                    apr = do_month(mar, a4, rate)
-                    for a5 in range(0,int(salary/12),101):
-                        if (a1+a2+a3+a4+a5) > max_yearly_contribution:
-                            break
-                        may = do_month(apr, a5, rate)
-                        for a6 in range(0,int(salary/12),11):
-                            if (a1+a2+a3+a4+a5+a6) > max_yearly_contribution:
-                                break
-                            jun = do_month(may, a6, rate)
-                            for a7 in range(0,int(salary/12),11):
-                                if (a1+a2+a3+a4+a5+a6+a7) > max_yearly_contribution:
-                                    break
-                                jul = do_month(jun, a7, rate)
-                                for a8 in range(0,int(salary/12),11):
-                                    if (a1+a2+a3+a4+a5+a6+a7+a8) > max_yearly_contribution:
-                                        break
-                                    aug = do_month(jul, a8, rate)
-                                    for a9 in range(0,int(salary/12),11):
-                                        if (a1+a2+a3+a4+a5+a6+a7+a8+a9) > max_yearly_contribution:
-                                            break
-                                        sep = do_month(aug, a9, rate)
-                                        for a10 in range(0,int(salary/12),11):
-                                            if (a1+a2+a3+a4+a5+a6+a7+a8+a9+a10) > max_yearly_contribution:
-                                                break
-                                            oct = do_month(sep, a10, rate)
-                                            for a11 in range(0,int(salary/12),11):
-                                                if (a1+a2+a3+a4+a5+a6+a7+a8+a9+a10+a11) > max_yearly_contribution:
-                                                    break
-                                                nov = do_month(oct, a11, rate)
-                                                for a12 in range(0,int(salary/12),11):
-                                                    if (a1+a2+a3+a4+a5+a6+a7+a8+a9+a10+a11+a12) > max_yearly_contribution:
-                                                        break
-                                                    dec = do_month(nov, a12, rate)
-                                                    if dec > max_val:
-                                                        max_val = dec
-                                                        best_jan = a1
-                                                        best_feb = a2
-                                                        best_mar = a3
-                                                        best_apr = a4
-                                                        best_may = a5
-                                                        best_jun = a6
-                                                        best_jul = a7
-                                                        best_aug = a8
-                                                        best_sep = a9
-                                                        best_oct = a10
-                                                        best_nov = a11
-                                                        best_dec = a12
-                                                        print("New max found:",max_val,"Bests:",best_jan,best_feb,best_mar,best_apr,best_may,best_jun,best_jul,best_aug,best_sep,best_oct,best_nov,best_dec)
+            else:
+                l[i] = l[i] + STEP
+                l[i-1] = l[i-1] - STEP
 
-    print("Best jan:",best_jan) #expected ~4337.5
-    print("Best feb:",best_feb) #expected ~4337.5
-    print("Best mar:",best_mar) #expected ~4337.5
-    print("Best apr:",best_apr) #expected ~4337.5
-    print("Best may:",best_may) #expected ~393.75
-    print("Best jun:",best_jun) #expected ~393.75
-    print("Best jul:",best_jul) #expected ~393.75
-    print("Best aug:",best_aug) #expected ~393.75
-    print("Best sep:",best_sep) #expected ~393.75
-    print("Best oct:",best_oct) #expected ~393.75
-    print("Best nov:",best_nov) #expected ~393.75
-    print("Best dec:",best_dec) #expected ~393.75
-    print("Max total:",max_val) #expected ~44376.5
-
-maximize(current_balance,test_rate)
+print("Found best set:",max,l)
